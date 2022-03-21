@@ -1,9 +1,9 @@
 #define NUM_LEDS 64
-#define Y_ELEMENTS 8
-#define X_ELEMENTS 8
+#define X_PIXELS 8
+#define Y_PIXELS 8
 #define MAX_X_ELEMENTS 7
 #define MAX_Y_ELEMENTS 7
-#define LED_PIN 4
+#define LED_PIN 5
 #define NUM_BITS_ENCODING 30
 #define X_ENCODING_LENGTH 5
 #define Y_ENCODING_LENGTH 6
@@ -33,3 +33,10 @@ const uint8_t lookupArray[NUM_LEDS] =
 };
 
 
+//union Led_Config_t
+//{
+//    const byte maxXelements;
+//    const byte maxYelements;
+//    const byte numLEDS;
+//    const byte ledPin;
+//} Led_Config;

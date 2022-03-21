@@ -1,7 +1,7 @@
 #ifndef LETTER_DEFS_H
 #define LETTER_DEFS
 
-typedef struct Letter_t
+typedef struct Letter_t // TODO rename this to character 
 {
     const uint32_t encoding; 
     byte x;
@@ -28,7 +28,7 @@ Letter _b = {
 };
 
 Letter _c = {
-    .encoding = 0xFC21087C
+    .encoding = 0x7C21083C
 };
 
 Letter _d = {
@@ -64,7 +64,7 @@ Letter _k = {
 };
 
 Letter _l = {
-    .encoding = 0x8421087C
+    .encoding = 0x8421083C
 };
 
 Letter _m = {
@@ -88,7 +88,7 @@ Letter _q = {
 };
 
 Letter _r = {
-    .encoding = 0xE4A5C944
+    .encoding = 0xF463E944
 };
 
 Letter _s = {
@@ -145,7 +145,7 @@ Letter _three =
 
 Letter _four = 
 {
-    .encoding = 0x8C63F084
+    .encoding = 0x8C62F084
 };
 
 Letter _five = 
@@ -155,7 +155,7 @@ Letter _five =
 
 Letter _six = 
 {
-    .encoding = 0x7460E0F8
+    .encoding = 0x743D18B8
 };
 
 Letter _seven = 
