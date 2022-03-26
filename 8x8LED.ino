@@ -14,47 +14,25 @@ static void writePixel(const byte x, const byte y )
     {
         return; // Ignore the write command if x and y are out of bounds. 
     }
-    leds[lookupArray[y*Y_PIXELS + x]] = CRGB(0,0,10);
+//    leds[lookupArray[y*Y_PIXELS + x]] = CRGB(0,0,10);
+
+    uint8_t assignment;
+    assignment = ( isEven(x) )? X_PIXELS*x+y : Y_PIXELS*x +( Y_PIXELS-1-y ) ;  
+    /*  If even, assignment is COLS * X + y
+        if odd, assignment is 
+    */
+    leds[assignment] = CRGB(0,0,10);
 }
 
 
-/* Writes a single letter based on a starting x and y coordinate. Will adjust the render commands
- * based on the total amount of possilbe x and y spots. If the full letter will not be rendered, the 
- * iteration will account for only those specified bounds and only render the relevant encoded bits. 
- */
-//void writeSingleLetter( const Letter * const lr, 
-//                        const byte x_start, 
-//                        const byte y_start )
-//{
-//
-//    byte colsToIterate;
-//    byte rowsToIterate;
-//    byte y_max;
-//    uint32_t letter = lr->encoding;
-//    colsToIterate = ( (x_start + X_ENCODING_LENGTH) > X_ELEMENTS )?  X_ELEMENTS - x_start :X_ENCODING_LENGTH;
-//    rowsToIterate = ( (y_start + Y_ENCODING_LENGTH) > Y_ELEMENTS )?  Y_ELEMENTS - y_start :Y_ENCODING_LENGTH;
-//    
-//    // start: 0 1 2 3 4 5 6 7 
-//    // clip:  0 0 0 0 1 2 3 4
-//
-//    byte clipped_columns = ( x_start > 3 )? x_start - 3: 0;
-//    byte current_x;
-//    byte current_y;
-//    for ( current_y = 0; current_y < colsToIterate; current_y++ )
-//    {
-//        
-//        for ( current_x = 0; current_x < rowsToIterate; current_x++ )
-//        {
-//            if ( letter & 0x20000000 )  
-//            {
-//                writePixel( current_x, current_y );
-//            }
-//            letter = (letter << 1) & 0x3FFFFFFF;
-//        }
-//        // Shift by the clipping value? 
-//        letter = ( letter << clipped_columns );
-//    }
-//}
+
+
+/* Returns true if even, 1 if false */
+static inline bool isEven (uint8_t num)
+{
+    return ( 0 == ( num % 2));
+}
+
 
 void writeLetterTesting( Letter * lt )
 {
@@ -65,7 +43,14 @@ void writeLetterTesting( Letter * lt )
     uint8_t y_ct; // y counter
     const byte x_it = min( X_ENCODING_LENGTH, X_PIXELS - lt->x );
     const byte y_it = min( Y_ENCODING_LENGTH, Y_PIXELS - lt->y );
-    const byte x_clipped = min ( lt->x + (byte)X_ENCODING_LENGTH - (byte)X_PIXELS, X_ENCODING_LENGTH); 
+//    const byte x_clipped = min ( lt->x + (byte)X_ENCODING_LENGTH - (byte)X_PIXELS, X_ENCODING_LENGTH); 
+
+    int x_c = lt->x +(byte)X_ENCODING_LENGTH - (byte)X_PIXELS;
+    if (x_c <= 0)
+    {
+        x_c = 0;
+    }
+    const byte x_clipped = (uint8_t) x_c;
 
     Serial.print("\n X Iterations: ");
     Serial.print( x_it);
@@ -151,7 +136,7 @@ void testLetterScroll( Letter * lt )
     uint8_t counter;
     for ( counter = 0; counter < 8; counter++ )
     {
-        setLetterCoordinate(lt, counter, counter);
+        setLetterCoordinate(lt, 2, counter);
         writeLetterTesting (lt);
         FastLED.show();
         delay(500);
