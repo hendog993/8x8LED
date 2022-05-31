@@ -1,10 +1,25 @@
 #include <FastLED.h>
-#include "types.h"
+//#include "types.h"
 #include "letter_defs.h"
 
-CRGB leds [ NUM_LEDS ] ;
+/* Changes based on LED matrix used */
+#define X_PIXELS 32
+#define Y_PIXELS 8
+#define LED_PIN 5
 
-/* Writes a single pixel white based on x and y input  */
+/* Derived define types */
+#define NUM_LEDS X_PIXELS * Y_PIXELS
+#define MAX_X_ELEMENTS X_PIXELS - 1
+#define MAX_Y_ELEMENTS Y_PIXELS - 1
+
+/* Constant per encoding standard */
+#define NUM_BITS_ENCODING 30
+#define X_ENCODING_LENGTH 5
+#define Y_ENCODING_LENGTH 6
+
+CRGB leds [ NUM_LEDS ] ;
+ 
+/* Writes a single pixel based on x and y input  */
 static void writePixel(const byte x, const byte y )
 {
     if ( (x > MAX_X_ELEMENTS) ||
@@ -16,36 +31,22 @@ static void writePixel(const byte x, const byte y )
     }
 //    leds[lookupArray[y*Y_PIXELS + x]] = CRGB(0,0,10);
 
-    uint8_t assignment;
-    assignment = ( isEven(x) )? X_PIXELS*x+y : Y_PIXELS*x +( Y_PIXELS-1-y ) ;  
-    /*  If even, assignment is COLS * X + y
-        if odd, assignment is 
-    */
+    uint16_t assignment = ( ( 0 == ( x % 2)))? X_PIXELS*x+y : Y_PIXELS*x +( Y_PIXELS-1-y ) ;  
     leds[assignment] = CRGB(0,0,10);
 }
 
 
-
-
-/* Returns true if even, 1 if false */
-static inline bool isEven (uint8_t num)
+void writeLetterTesting( Character * ct )
 {
-    return ( 0 == ( num % 2));
-}
-
-
-void writeLetterTesting( Letter * lt )
-{
-
     // Ensure the letter input parameters are correct.
     
     uint8_t x_ct; // x counter
     uint8_t y_ct; // y counter
-    const byte x_it = min( X_ENCODING_LENGTH, X_PIXELS - lt->x );
-    const byte y_it = min( Y_ENCODING_LENGTH, Y_PIXELS - lt->y );
+    const byte x_it = min( X_ENCODING_LENGTH, X_PIXELS - ct->x );
+    const byte y_it = min( Y_ENCODING_LENGTH, Y_PIXELS - ct->y );
 //    const byte x_clipped = min ( lt->x + (byte)X_ENCODING_LENGTH - (byte)X_PIXELS, X_ENCODING_LENGTH); 
 
-    int x_c = lt->x +(byte)X_ENCODING_LENGTH - (byte)X_PIXELS;
+    int x_c = ct->x +(byte)X_ENCODING_LENGTH - (byte)X_PIXELS;
     if (x_c <= 0)
     {
         x_c = 0;
@@ -59,7 +60,7 @@ void writeLetterTesting( Letter * lt )
     Serial.print("     X Clippeed: ");
     Serial.print(x_clipped);
     
-    uint32_t encodingVal = lt->encoding; // Copy of the encoding value, used to shift the encoding val that is const. 
+    uint32_t encodingVal = ct->encoding; // Copy of the encoding value, used to shift the encoding val that is const. 
     /* For loop starts with the y coordinate (1st row). */
     for (y_ct = 0; y_ct < y_it; y_ct++)
     {
@@ -68,7 +69,7 @@ void writeLetterTesting( Letter * lt )
             // If the encoding value equals 1, write the position to the current x y coordinate. 
             if ( (encodingVal) & 0x80000000)
             {
-                writePixel ( lt->x + x_ct, lt->y + y_ct );
+                writePixel ( ct->x + x_ct, ct->y + y_ct );
             }
             encodingVal = encodingVal << 1 ; // This will be zero in the case of no clipping. 
         }
@@ -78,7 +79,7 @@ void writeLetterTesting( Letter * lt )
 }
 
 
-void setLetterCoordinate( Letter * lt, byte x, byte y )
+void setLetterCoordinate( Character * ct, byte x, byte y )
 {
     if ( ( x > MAX_X_ELEMENTS ) ||
         (y > MAX_Y_ELEMENTS))
@@ -86,20 +87,22 @@ void setLetterCoordinate( Letter * lt, byte x, byte y )
         return;
     }
     
-    lt->x = x;
-    lt->y = y;
+    ct->x = x;
+    ct->y = y;
+    return;
 }
 
 
-uint8_t counter;
-const Letter lettArr[] = {_a,_b,_c,_d,_e,_f,_g,_h,_i,_j,_k,_l,_m,_n,_o,_p,_q,_r,_s,_t,_u,_v,_w,_x,_y,_z  };
-const Letter numArr[] = {_zero,_one,_two,_three,_four,_five,_six,_seven,_eight,_nine};
+uint8_t testeCounter;
+
+extern const Character lettArr[];
+extern const Character numArr[];
 
 void testAlphabet()
 {
-    for (counter = 0; counter < 26; counter++)
+    for (testeCounter = 0; testeCounter < 26; testeCounter++)
     {
-        writeLetterTesting ( &(lettArr[counter]));
+        writeLetterTesting ( &(lettArr[testeCounter]));
         FastLED.show();
         delay(1000);
         FastLED.clear();
@@ -110,9 +113,9 @@ void testAlphabet()
 
 void testNumbers()
 {
-    for (counter = 0; counter < 10; counter++) 
+    for (testeCounter = 0; testeCounter < 10; testeCounter++) 
     {
-        writeLetterTesting( &(numArr[counter]));
+        writeLetterTesting( &(numArr[testeCounter]));
         FastLED.show();
         delay(1000);
         FastLED.clear();
@@ -126,13 +129,10 @@ void setup()
     FastLED.setMaxPowerInVoltsAndMilliamps( 5, 500 );
     FastLED.clear();
     FastLED.show();
-    setLetterCoordinate ( &_d, 4,4);
 }
 
-
-void testLetterScroll( Letter * lt )
+void testLetterScroll( Character * lt )
 {
-
     uint8_t counter;
     for ( counter = 0; counter < 8; counter++ )
     {
@@ -141,15 +141,21 @@ void testLetterScroll( Letter * lt )
         FastLED.show();
         delay(500);
         FastLED.clear();
-    }
-    
+    }   
+}
+
+void testLetterScrollLR( Character * lt)
+{
+
 }
 
 void loop()
 {   
-
-
-    testLetterScroll ( &_p);
-
+    Character * thisLetter = ( &(lettArr[0]));
+    //testLetterScroll ( &_s);
+    //setLetterCoordinate( )
+    setLetterCoordinate(thisLetter, 2, 1);
+    writeLetterTesting (thisLetter);
+    FastLED.show();
  
 }
